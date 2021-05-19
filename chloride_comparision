@@ -1,0 +1,694 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled3.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "authorship_tag": "ABX9TyMpMmFhpq8KtWh5vGkIFbx8",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/prakanshurockss/classifier-model_intern_Task/blob/main/chloride_comparision\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "nohzJJqPRqYk"
+      },
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n"
+      ],
+      "execution_count": 89,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "AwL85FPURtgm"
+      },
+      "source": [
+        "features=pd.read_csv('training_data.csv')\n",
+        "features_test=pd.read_csv('test_data.csv')"
+      ],
+      "execution_count": 90,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "jEjyRgQJSVRm",
+        "outputId": "7f420c2f-4d82-45b2-a492-186178589f25"
+      },
+      "source": [
+        "print(features)"
+      ],
+      "execution_count": 91,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "      patient_id standard_lab_parameter_name  ...  age_group gender\n",
+            "0              0                         WBC  ...        old   male\n",
+            "1              1                          T4  ...        old   male\n",
+            "2              2                         WBC  ...      adult   male\n",
+            "3              3                          T4  ...      adult   male\n",
+            "4              4                         WBC  ...      adult   male\n",
+            "...          ...                         ...  ...        ...    ...\n",
+            "9995        9995                         WBC  ...      adult   male\n",
+            "9996        9996                         WBC  ...      adult   male\n",
+            "9997        9997                          T4  ...        old   male\n",
+            "9998        9998                         WBC  ...        old   male\n",
+            "9999        9999                          T4  ...      adult   male\n",
+            "\n",
+            "[10000 rows x 9 columns]\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "fy1o4IMcYCB8"
+      },
+      "source": [
+        "features=features.drop(['unit','patient_id','created_at','reference_high', 'reference_low','gender'],axis=1)\n"
+      ],
+      "execution_count": 92,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "chmVikUTd-oz"
+      },
+      "source": [
+        "features_test=features_test.drop(['unit','patient_id','created_at','reference_high', 'reference_low','Unnamed: 0'],axis=1)"
+      ],
+      "execution_count": 94,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 498
+        },
+        "id": "cz7floe1Xpwn",
+        "outputId": "f55425c3-5987-4cf0-93a4-dcafcc9f4d52"
+      },
+      "source": [
+        "features.head(15)"
+      ],
+      "execution_count": 93,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>standard_lab_parameter_name</th>\n",
+              "      <th>parameter_value</th>\n",
+              "      <th>age_group</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>WBC</td>\n",
+              "      <td>579.00</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>T4</td>\n",
+              "      <td>5.00</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>WBC</td>\n",
+              "      <td>6.81</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>T4</td>\n",
+              "      <td>5.70</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>WBC</td>\n",
+              "      <td>4.64</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5</th>\n",
+              "      <td>T4</td>\n",
+              "      <td>8.50</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>6</th>\n",
+              "      <td>Sodium</td>\n",
+              "      <td>135.40</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>7</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>105.30</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>8</th>\n",
+              "      <td>WBC</td>\n",
+              "      <td>7.20</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>9</th>\n",
+              "      <td>WBC</td>\n",
+              "      <td>6.41</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>10</th>\n",
+              "      <td>T4</td>\n",
+              "      <td>7.40</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>11</th>\n",
+              "      <td>Sodium</td>\n",
+              "      <td>133.00</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>12</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>107.00</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>13</th>\n",
+              "      <td>T4</td>\n",
+              "      <td>4.40</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>14</th>\n",
+              "      <td>WBC</td>\n",
+              "      <td>920000.00</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "   standard_lab_parameter_name  parameter_value age_group\n",
+              "0                          WBC           579.00       old\n",
+              "1                           T4             5.00       old\n",
+              "2                          WBC             6.81     adult\n",
+              "3                           T4             5.70     adult\n",
+              "4                          WBC             4.64     adult\n",
+              "5                           T4             8.50     adult\n",
+              "6                       Sodium           135.40     adult\n",
+              "7                     Chloride           105.30     adult\n",
+              "8                          WBC             7.20     adult\n",
+              "9                          WBC             6.41     adult\n",
+              "10                          T4             7.40     adult\n",
+              "11                      Sodium           133.00     adult\n",
+              "12                    Chloride           107.00     adult\n",
+              "13                          T4             4.40     adult\n",
+              "14                         WBC        920000.00     adult"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 93
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "H8e5OonbZhBI"
+      },
+      "source": [
+        "features=features[features.standard_lab_parameter_name.str.contains('Chloride',case=False)]\n",
+        "features_test=features_test[features_test.standard_lab_parameter_name.str.contains('Chloride',case=False)]"
+      ],
+      "execution_count": 95,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 498
+        },
+        "id": "8ZOWHihcepkH",
+        "outputId": "bcc78e21-f0ae-4f55-9f6c-c93189e7d86f"
+      },
+      "source": [
+        "features_test.head(15)"
+      ],
+      "execution_count": 96,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>standard_lab_parameter_name</th>\n",
+              "      <th>parameter_value</th>\n",
+              "      <th>age_group</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>11</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>98.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>20</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>108.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>25</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>108.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>30</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>99.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>36</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>98.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>45</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>96.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>52</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>100.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>59</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>103.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>65</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>107.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>69</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>99.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>75</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>106.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>89</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>99.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>95</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>101.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>100</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>102.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>115</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>107.0</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "    standard_lab_parameter_name  parameter_value age_group\n",
+              "11                     Chloride             98.0       old\n",
+              "20                     Chloride            108.0       old\n",
+              "25                     Chloride            108.0     adult\n",
+              "30                     Chloride             99.0       old\n",
+              "36                     Chloride             98.0       old\n",
+              "45                     Chloride             96.0     adult\n",
+              "52                     Chloride            100.0     adult\n",
+              "59                     Chloride            103.0       old\n",
+              "65                     Chloride            107.0     adult\n",
+              "69                     Chloride             99.0       old\n",
+              "75                     Chloride            106.0     adult\n",
+              "89                     Chloride             99.0     adult\n",
+              "95                     Chloride            101.0     adult\n",
+              "100                    Chloride            102.0     adult\n",
+              "115                    Chloride            107.0       old"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 96
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 498
+        },
+        "id": "iyZjARIJdpCw",
+        "outputId": "6c479eab-1f57-4ec7-a47f-41ff890f6ae7"
+      },
+      "source": [
+        "features.head(15)"
+      ],
+      "execution_count": 97,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>standard_lab_parameter_name</th>\n",
+              "      <th>parameter_value</th>\n",
+              "      <th>age_group</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>7</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>105.3</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>12</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>107.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>23</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>106.5</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>30</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>98.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>46</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>101.9</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>50</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>104.3</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>71</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>104.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>82</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>101.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>89</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>103.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>93</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>104.5</td>\n",
+              "      <td>old</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>96</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>102.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>107</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>99.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>119</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>103.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>130</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>105.0</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>139</th>\n",
+              "      <td>Chloride</td>\n",
+              "      <td>101.2</td>\n",
+              "      <td>adult</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "    standard_lab_parameter_name  parameter_value age_group\n",
+              "7                      Chloride            105.3     adult\n",
+              "12                     Chloride            107.0     adult\n",
+              "23                     Chloride            106.5       old\n",
+              "30                     Chloride             98.0     adult\n",
+              "46                     Chloride            101.9       old\n",
+              "50                     Chloride            104.3     adult\n",
+              "71                     Chloride            104.0     adult\n",
+              "82                     Chloride            101.0     adult\n",
+              "89                     Chloride            103.0     adult\n",
+              "93                     Chloride            104.5       old\n",
+              "96                     Chloride            102.0     adult\n",
+              "107                    Chloride             99.0     adult\n",
+              "119                    Chloride            103.0     adult\n",
+              "130                    Chloride            105.0     adult\n",
+              "139                    Chloride            101.2     adult"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 97
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 350
+        },
+        "id": "mzI9KkcKb_7J",
+        "outputId": "d751e86c-38c7-4cec-b8dd-aebc873d92d1"
+      },
+      "source": [
+        "fig = plt.figure(figsize = (10, 5))\n",
+        " \n",
+        "# creating the bar plot\n",
+        "plt.bar(features.age_group, features.parameter_value, color ='maroon',\n",
+        "        width = 0.4)\n",
+        " \n",
+        "plt.xlabel(\"age_group\")\n",
+        "plt.ylabel(\"parameter_value\")\n",
+        "plt.title(\"chloride comparision of train_data\")\n",
+        "plt.show()"
+      ],
+      "execution_count": 98,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 720x360 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "tags": [],
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 350
+        },
+        "id": "ib4_cTXJfF2J",
+        "outputId": "db93f2b2-ca0e-4b55-ea9b-a8b6f43c11b1"
+      },
+      "source": [
+        "fig = plt.figure(figsize = (10, 5))\n",
+        " \n",
+        "# creating the bar plot\n",
+        "plt.bar(features_test.age_group, features_test.parameter_value, color ='maroon',\n",
+        "        width = 0.4)\n",
+        " \n",
+        "plt.xlabel(\"age_group\")\n",
+        "plt.ylabel(\"parameter_value\")\n",
+        "plt.title(\"chloride comparision of test_data\")\n",
+        "plt.show()"
+      ],
+      "execution_count": 99,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 720x360 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "tags": [],
+            "needs_background": "light"
+          }
+        }
+      ]
+    }
+  ]
+}
